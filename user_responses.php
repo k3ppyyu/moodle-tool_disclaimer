@@ -42,7 +42,7 @@ require_capability('tool/disclaimer:edit', $context);
 $userid = optional_param('userid', 0, PARAM_INT);
 $firstname = optional_param('firstname', '', PARAM_TEXT);
 $lastname = optional_param('lastname', '', PARAM_TEXT);
-$disclaimercontext = optional_param('context', '', PARAM_ALPHA);
+$disclaimercontext = optional_param('context', '', PARAM_ALPHANUMEXT);
 $responsestatus = optional_param('response', -1, PARAM_INT);
 
 // Set page URL with all filter parameters for pagination to work correctly.
@@ -121,10 +121,12 @@ $where = !empty($sqlwhere) ? implode(' AND ', $sqlwhere) : '1=1';
 
 // Define the SQL query to fetch data.
 $fields = 'dl.id, u.id as userid, u.firstname, u.lastname, u.email, ' .
-          'd.name as disclaimername, d.context, dl.response, dl.attempt, dl.timecreated';
+          'd.name as disclaimername, d.context, dl.objectid as courseid, ' .
+          'c.fullname as coursefullname, dl.response, dl.attempt, dl.timecreated';
 $from = '{tool_disclaimer_log} dl 
          JOIN {user} u ON u.id = dl.userid 
-         JOIN {tool_disclaimer} d ON d.id = dl.disclaimerid';
+         JOIN {tool_disclaimer} d ON d.id = dl.disclaimerid
+         LEFT JOIN {course} c ON c.id = dl.objectid AND d.context = \'course\'';
 
 $table->set_sql($fields, $from, $where, $params);
 

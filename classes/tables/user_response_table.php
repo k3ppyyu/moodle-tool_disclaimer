@@ -47,7 +47,7 @@ class user_response_table extends \table_sql {
 
         // Define the columns to be displayed.
         $columns = ['userid', 'firstname', 'lastname', 'email', 'disclaimername',
-                    'context', 'response', 'attempt', 'timecreated', 'actions'];
+                    'context', 'courseid', 'coursefullname', 'response', 'attempt', 'timecreated', 'actions'];
         $this->define_columns($columns);
 
         // Define the headers for the columns.
@@ -58,6 +58,8 @@ class user_response_table extends \table_sql {
             get_string('email'),
             get_string('disclaimer_name', 'tool_disclaimer'),
             get_string('context', 'tool_disclaimer'),
+            get_string('courseid', 'tool_disclaimer'),
+            get_string('coursefullname', 'tool_disclaimer'),
             get_string('response_status', 'tool_disclaimer'),
             get_string('attempt', 'tool_disclaimer'),
             get_string('timecreated', 'tool_disclaimer'),
@@ -69,12 +71,42 @@ class user_response_table extends \table_sql {
         // Make table sortable.
         $this->sortable(true, 'timecreated', SORT_DESC);
         $this->no_sorting('actions');
+        $this->no_sorting('coursefullname');
 
         // Don't allow wrapping for better display.
         $this->column_class('userid', 'text-center');
+        $this->column_class('courseid', 'text-center');
         $this->column_class('response', 'text-center');
         $this->column_class('attempt', 'text-center');
         $this->column_class('actions', 'text-center');
+    }
+
+    /**
+     * Format the course ID column - only shown for course context disclaimers.
+     *
+     * @param object $values Row data
+     * @return string Formatted HTML
+     */
+    public function col_courseid($values) {
+        if ($values->context === 'course' && !empty($values->courseid)) {
+            return \html_writer::tag('span', (int)$values->courseid);
+        }
+        return \html_writer::tag('span', '-', ['class' => 'text-muted']);
+    }
+
+    /**
+     * Format the course full name column - only shown for course context disclaimers.
+     *
+     * @param object $values Row data
+     * @return string Formatted HTML
+     */
+    public function col_coursefullname($values) {
+        global $CFG;
+        if ($values->context === 'course' && !empty($values->coursefullname)) {
+            $url = new \moodle_url('/course/view.php', ['id' => $values->courseid]);
+            return \html_writer::link($url, format_string($values->coursefullname));
+        }
+        return \html_writer::tag('span', '-', ['class' => 'text-muted']);
     }
 
     /**
